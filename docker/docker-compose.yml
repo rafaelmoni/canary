@@ -1,0 +1,59 @@
+version: "3.3"
+
+services:
+  database:
+    container_name: Tibia13-DB
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    #restart: unless-stopped
+    environment:
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: otservbr-global
+      MYSQL_USER: ot-eoarh
+      MYSQL_PASSWORD: ot-eoarh123
+
+  server:
+    container_name: Tibia13-Server
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile.x86
+    #restart: unless-stopped
+    environment:
+      OT_DB_HOST: Tibia13-DB
+      OT_DB_PORT: 3306
+      OT_DB_USER: ot-eoarh
+      OT_DB_PASSWORD: ot-eoarh123
+      OT_DB_DATABASE: otservbr-global
+      OT_SERVER_DATA: data-otservbr-global
+      OT_SERVER_IP: 127.0.0.1
+      OT_SERVER_LOGIN_PORT: 7171
+      OT_SERVER_GAME_PORT: 7172
+      OT_SERVER_STATUS_PORT: 7171
+      OT_SERVER_TEST_ACCOUNTS: false
+    ports:
+      - 7171:7171
+      - 7172:7172
+
+  login:
+    container_name: Tibia13-Login
+    image: ghcr.io/opentibiabr/login-server:1.1.3
+    #restart: unless-stopped
+    ports:
+      - 80:80
+      - 9090:9090
+    environment:
+      LOGIN_HTTP_PORT: 80
+      LOGIN_GRPC_PORT: 9090
+      MYSQL_HOST: Tibia13-DB
+      MYSQL_PORT: 3306
+      MYSQL_DBNAME: otservbr-global
+      MYSQL_USER: ot-eoarh
+      MYSQL_PASS: ot-eoarh123
+      SERVER_NAME: OTServBR-Global
+      SERVER_IP: 127.0.0.1
+      SERVER_PORT: 7172
+      RATE_LIMITER_RATE: 3000000000000
+      RATE_LIMITER_BURST: 53000000000000
+      ENV_LOG_LEVEL: debug
